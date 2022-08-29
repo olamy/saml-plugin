@@ -22,7 +22,9 @@ import hudson.security.AuthorizationStrategy;
 import hudson.security.SecurityRealm;
 import hudson.util.Secret;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.LogRecord;
 import org.acegisecurity.GrantedAuthority;
@@ -56,7 +58,10 @@ import static org.junit.Assert.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
 import org.jvnet.hudson.test.Issue;
 import org.pac4j.saml.profile.SAML2Profile;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.opensaml.saml.common.xml.SAMLConstants.SAML2_POST_BINDING_URI;
 import static org.opensaml.saml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_URI;
 
@@ -67,10 +72,10 @@ import static org.opensaml.saml.common.xml.SAMLConstants.SAML2_REDIRECT_BINDING_
 public class SamlSecurityRealmTest {
 
     @Rule
-    public JenkinsRule jenkinsRule = new JenkinsRule();
+    public final JenkinsRule jenkinsRule = new JenkinsRule();
 
     @Rule
-    public LoggerRule logs = new LoggerRule().record(SamlSecurityRealm.class, Level.WARNING);
+    public final LoggerRule logs = new LoggerRule().record(SamlSecurityRealm.class, Level.WARNING);
 
     private SamlSecurityRealm samlSecurityRealm;
 
@@ -96,7 +101,7 @@ public class SamlSecurityRealmTest {
         assertEquals("none", samlSecurityRealm.getUsernameCaseConversion());
         assertEquals("urn:mace:dir:attribute-def:mail", samlSecurityRealm.getEmailAttributeName());
         assertEquals("urn:mace:dir:attribute-def:uid", samlSecurityRealm.getUsernameAttributeName());
-        assertEquals(true, samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
+        assertTrue(samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
         assertEquals(SAML2_REDIRECT_BINDING_URI, samlSecurityRealm.getBinding());
     }
 
@@ -109,7 +114,7 @@ public class SamlSecurityRealmTest {
         assertEquals("none", samlSecurityRealm.getUsernameCaseConversion());
         assertEquals("urn:mace:dir:attribute-def:mail", samlSecurityRealm.getEmailAttributeName());
         assertEquals("urn:mace:dir:attribute-def:uid", samlSecurityRealm.getUsernameAttributeName());
-        assertEquals(true, samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
+        assertTrue(samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
         assertEquals(SAML2_POST_BINDING_URI, samlSecurityRealm.getBinding());
     }
 
@@ -121,7 +126,7 @@ public class SamlSecurityRealmTest {
         assertEquals(86400, samlSecurityRealm.getMaximumAuthenticationLifetime().longValue());
         assertEquals("lowercase", samlSecurityRealm.getUsernameCaseConversion());
         assertEquals("urn:mace:dir:attribute-def:uid", samlSecurityRealm.getUsernameAttributeName());
-        assertEquals(true, samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
+        assertTrue(samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
         assertEquals(SAML2_REDIRECT_BINDING_URI, samlSecurityRealm.getBinding());
     }
 
@@ -133,7 +138,7 @@ public class SamlSecurityRealmTest {
         assertEquals(86400, samlSecurityRealm.getMaximumAuthenticationLifetime().longValue());
         assertEquals("uppercase", samlSecurityRealm.getUsernameCaseConversion());
         assertEquals("urn:mace:dir:attribute-def:uid", samlSecurityRealm.getUsernameAttributeName());
-        assertEquals(true, samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
+        assertTrue(samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
         assertEquals(SAML2_REDIRECT_BINDING_URI, samlSecurityRealm.getBinding());
     }
 
@@ -146,7 +151,7 @@ public class SamlSecurityRealmTest {
         assertEquals(86400, samlSecurityRealm.getMaximumAuthenticationLifetime().longValue());
         assertEquals("none", samlSecurityRealm.getUsernameCaseConversion());
         assertEquals("urn:mace:dir:attribute-def:uid", samlSecurityRealm.getUsernameAttributeName());
-        assertEquals(true, samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
+        assertTrue(samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
         assertEquals("/home/jdk/keystore", samlSecurityRealm.getEncryptionData().getKeystorePath());
         assertEquals(Secret.fromString("changeitks"), samlSecurityRealm.getEncryptionData().getKeystorePassword());
         assertEquals(Secret.fromString("changeitpk"), samlSecurityRealm.getEncryptionData().getPrivateKeyPassword());
@@ -157,7 +162,7 @@ public class SamlSecurityRealmTest {
         assertEquals(Secret.fromString("changeitks"), samlSecurityRealm.getEncryptionData().getKeystorePassword());
         assertEquals(Secret.fromString("changeitpk"), samlSecurityRealm.getEncryptionData().getPrivateKeyPassword());
         assertThat(new XmlFile(new File(jenkinsRule.jenkins.root, "config.xml")).asString(), not(containsString("changeit")));
-        assertEquals(false, samlSecurityRealm.getEncryptionData().isForceSignRedirectBindingAuthnRequest());
+        assertFalse(samlSecurityRealm.getEncryptionData().isForceSignRedirectBindingAuthnRequest());
     }
 
     @LocalData
@@ -168,10 +173,10 @@ public class SamlSecurityRealmTest {
         assertEquals(86400, samlSecurityRealm.getMaximumAuthenticationLifetime().longValue());
         assertEquals("none", samlSecurityRealm.getUsernameCaseConversion());
         assertEquals("urn:mace:dir:attribute-def:uid", samlSecurityRealm.getUsernameAttributeName());
-        assertEquals(true, samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
+        assertTrue(samlSecurityRealm.getIdpMetadataConfiguration().getIdpMetadata().startsWith("<?xml version"));
         assertEquals("/home/jdk/keystore", samlSecurityRealm.getEncryptionData().getKeystorePath());
-        assertEquals(Secret.fromString("changeit"), samlSecurityRealm.getEncryptionData().getKeystorePassword());
-        assertEquals(Secret.fromString("changeit"), samlSecurityRealm.getEncryptionData().getPrivateKeyPassword());
+        assertEquals(Secret.fromString("changeitks"), samlSecurityRealm.getEncryptionData().getKeystorePassword());
+        assertEquals(Secret.fromString("changeitpk"), samlSecurityRealm.getEncryptionData().getPrivateKeyPassword());
         assertEquals(true, samlSecurityRealm.getAdvancedConfiguration().getForceAuthn());
         assertEquals("anotherContext", samlSecurityRealm.getAdvancedConfiguration().getAuthnContextClassRef());
         assertEquals("spEntityId", samlSecurityRealm.getAdvancedConfiguration().getSpEntityId());
@@ -206,28 +211,31 @@ public class SamlSecurityRealmTest {
                 samlSecurityRealm.getBinding(),
                 samlSecurityRealm.getEncryptionData(),
                 samlSecurityRealm.getAdvancedConfiguration());
-        assertEquals(samlPluginConfig.toString().equals(samlSecurityRealm.getSamlPluginConfig().toString()), true);
+        assertEquals(samlPluginConfig.toString(), samlSecurityRealm.getSamlPluginConfig().toString());
 
-        assertEquals(new SamlAdvancedConfiguration(null,null,null, null, null).toString().contains("SamlAdvancedConfiguration"),true);
-        assertEquals(new SamlAdvancedConfiguration(true,null,null, null, null).toString().contains("SamlAdvancedConfiguration"),true);
-        assertEquals(new SamlAdvancedConfiguration(true,"","", "", 1).toString().contains("SamlAdvancedConfiguration"),true);
+        assertTrue(
+            new SamlAdvancedConfiguration(null, null, null, null).toString().contains("SamlAdvancedConfiguration"));
+        assertTrue(
+            new SamlAdvancedConfiguration(true, null, null, null).toString().contains("SamlAdvancedConfiguration"));
+        assertTrue(new SamlAdvancedConfiguration(true, "", "", "").toString().contains("SamlAdvancedConfiguration"));
 
         SamlGroupAuthority authority = new SamlGroupAuthority("role001");
         assertEquals(authority.toString().equals("role001"),true);
 
         SamlUserDetails userDetails = new SamlUserDetails("tesla",new GrantedAuthority[]{authority});
-        assertEquals(userDetails.toString().contains("tesla") && userDetails.toString().contains("role001"), true);
+        assertTrue(userDetails.toString().contains("tesla") && userDetails.toString().contains("role001"));
 
         assertThat(new SamlEncryptionData(null,null,null, null, false, false).toString(), containsString(
                 "SamlEncryptionData"));
         assertThat(new SamlEncryptionData("", Secret.fromString(""), Secret.fromString(""), "", false, false).toString(), containsString("SamlEncryptionData"));
 
-        assertEquals(new SamlFileResource("fileNotExists").exists(),false);
+        assertFalse(new SamlFileResource("fileNotExists").exists());
         SamlFileResource file = new SamlFileResource("fileWillExists","data");
-        assertEquals(file.exists(),true);
-        assertEquals(IOUtils.toByteArray(file.getInputStream()).length>0,true);
-        IOUtils.write("data1",file.getOutputStream());
-        assertEquals(IOUtils.toByteArray(file.getInputStream()).length>0,true);
+        assertTrue(file.exists());
+        assertTrue(IOUtils.toByteArray(file.getInputStream()).length > 0);
+        IOUtils.write("data1", file.getOutputStream(), StandardCharsets.UTF_8);
+        assertTrue(IOUtils.toByteArray(file.getInputStream()).length > 0);
+        //noinspection ResultOfMethodCallIgnored
         file.getFile().delete();
     }
 
@@ -257,7 +265,7 @@ public class SamlSecurityRealmTest {
         // after upgrading a new file should be automatically created under JENKINS_HOME
         // without user interaction
 
-        String idpMetadata = FileUtils.readFileToString(new File(SamlSecurityRealm.getIDPMetadataFilePath()));
+        String idpMetadata = FileUtils.readFileToString(new File(SamlSecurityRealm.getIDPMetadataFilePath()), StandardCharsets.UTF_8);
         String configuredMetadata = ((SamlSecurityRealm) jenkinsRule.getInstance().getSecurityRealm())
                 .getIdpMetadataConfiguration().getIdpMetadata();
         idpMetadata = idpMetadata.replace(" ", ""); // remove spaces
