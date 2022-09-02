@@ -18,14 +18,16 @@ under the License. */
 package org.jenkinsci.plugins.saml;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
 import org.opensaml.core.config.InitializationException;
 import org.opensaml.core.config.InitializationService;
-import org.pac4j.core.context.J2EContext;
+import org.pac4j.jee.context.JEEContext;
 import org.pac4j.core.context.WebContext;
+import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.core.http.callback.NoParameterCallbackUrlResolver;
 import org.pac4j.saml.client.SAML2Client;
 import org.pac4j.saml.config.SAML2Configuration;
@@ -86,7 +88,7 @@ public abstract class OpenSAMLWrapper<T> {
      * @return J2E Context from the current HTTP request and response.
      */
     protected WebContext createWebContext() {
-        return new J2EContext(request, response);
+        return new JEEContext(request, response);
     }
 
     /**
@@ -140,8 +142,7 @@ public abstract class OpenSAMLWrapper<T> {
             // reference) is set, include it in the request to the IdP, and request
             // that the IdP uses exact matching for authentication types
             if (samlPluginConfig.getAuthnContextClassRef() != null) {
-                //noinspection deprecation
-                config.setAuthnContextClassRef(samlPluginConfig.getAuthnContextClassRef());
+                config.setAuthnContextClassRefs(Arrays.asList(samlPluginConfig.getAuthnContextClassRef()));
                 config.setComparisonType("exact");
             }
 
@@ -160,7 +161,7 @@ public abstract class OpenSAMLWrapper<T> {
         if (LOG.isLoggable(FINE)) {
             try {
                 LOG.fine(saml2Client.getServiceProviderMetadataResolver().getMetadata());
-            } catch (IOException e) {
+            } catch (TechnicalException e) {
                 LOG.fine("Is not possible to show the metadata : " + e.getMessage());
             }
         }

@@ -22,6 +22,7 @@ import org.kohsuke.stapler.HttpResponse;
 import org.kohsuke.stapler.HttpResponses;
 import org.kohsuke.stapler.StaplerRequest;
 import org.kohsuke.stapler.StaplerResponse;
+import org.pac4j.core.exception.TechnicalException;
 import org.pac4j.saml.client.SAML2Client;
 
 /**
@@ -46,7 +47,7 @@ public class SamlSPMetadataWrapper extends OpenSAMLWrapper<HttpResponse> {
         try {
             metadata = client.getServiceProviderMetadataResolver().getMetadata();
             client.destroy();
-        } catch (IOException e) {
+        } catch (TechnicalException e) {
            throw new IllegalStateException(e);
         }
         return HttpResponses.text(metadata);
