@@ -21,58 +21,48 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import javax.annotation.Nonnull;
 import edu.umd.cs.findbugs.annotations.NonNull;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.NotImplementedException;
+import org.pac4j.core.exception.TechnicalException;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
 
 /**
  * Class to manage the metadata files.
  */
-class SamlFileResource implements WritableResource {
+class SamlFileResourceDisk implements WritableResource {
 
-    private final WritableResource resource;
+    private final String fileName;
 
-    public SamlFileResource(@Nonnull String fileName) {
-        if(getUseDiskCache()){
-            this.resource = new SamlFileResourceCache(fileName);
-        } else {
-            this.resource = new SamlFileResourceDisk(fileName);
-        }
+    public SamlFileResourceDisk(@Nonnull String fileName) {
+        this.fileName = fileName;
     }
 
-    public SamlFileResource(@Nonnull String fileName, @Nonnull String data) {
-        if(getUseDiskCache()){
-            this.resource = new SamlFileResourceCache(fileName, data);
-        } else {
-            this.resource = new SamlFileResourceDisk(fileName, data);
+    public SamlFileResourceDisk(@Nonnull String fileName, @Nonnull String data) {
+        this.fileName = fileName;
+        try {
+            FileUtils.writeByteArrayToFile(getFile(), data.getBytes(StandardCharsets.UTF_8));
+        } catch (UnsupportedEncodingException e) {
+            throw new TechnicalException("Could not get string bytes.", e);
+        } catch (java.io.IOException e) {
+            throw new TechnicalException("Could not save the " + fileName + " file.", e);
         }
-    }
-
-    private boolean getUseDiskCache() {
-        boolean ret = false;
-        jenkins.model.Jenkins j = jenkins.model.Jenkins.get();
-        if (j.getSecurityRealm() instanceof SamlSecurityRealm) {
-            SamlSecurityRealm samlSecurityRealm = (SamlSecurityRealm) j.getSecurityRealm();
-            SamlAdvancedConfiguration config = samlSecurityRealm.getAdvancedConfiguration();
-            if(config != null ) {
-                ret = config.getUseDiskCache();
-            }
-        }
-        return ret;
     }
 
     @Override
     public boolean exists() {
-        return resource.exists();
+        return getFile().exists();
     }
 
     @Override
     public boolean isReadable() {
-        return resource.isReadable();
+        return getFile().canRead();
     }
 
     @Override
@@ -94,35 +84,35 @@ class SamlFileResource implements WritableResource {
 
     @Override
     public String getFilename() {
-        return resource.getFilename();
+        return fileName;
     }
 
     @NonNull
     @Override
     public String getDescription() {
-        return resource.getDescription();
+        return fileName;
     }
 
     @NonNull
     @Override
     public InputStream getInputStream() throws IOException {
-        return resource.getInputStream();
+        return FileUtils.openInputStream(getFile());
     }
 
     @NonNull
     @Override
-    public File getFile() throws IOException {
-        return resource.getFile();
+    public File getFile() {
+        return new File(fileName);
     }
 
     @Override
-    public long contentLength() throws IOException {
-        return resource.contentLength();
+    public long contentLength() {
+        return getFile().length();
     }
 
     @Override
-    public long lastModified() throws IOException {
-        return resource.lastModified();
+    public long lastModified() {
+        return getFile().lastModified();
     }
 
     @NonNull
@@ -133,12 +123,12 @@ class SamlFileResource implements WritableResource {
 
     @Override
     public boolean isWritable() {
-        return resource.isWritable();
+        return getFile().canWrite();
     }
 
     @NonNull
     @Override
     public OutputStream getOutputStream() throws IOException {
-        return resource.getOutputStream();
+        return FileUtils.openOutputStream(getFile());
     }
 }
