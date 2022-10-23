@@ -278,11 +278,10 @@ under the License.
         <groupId>org.cryptacular</groupId>
         <artifactId>cryptacular</artifactId>
       </dependency>
-      <!-- TODO: remove when CVE-2019-12400 is resolved -->
       <dependency>
         <groupId>org.apache.santuario</groupId>
         <artifactId>xmlsec</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
