@@ -9,7 +9,7 @@ updates:
         patterns:
           - "org.pac4j*"
           - "pac4j-*"
-  - package-ecosystem: "GitHub-actions"
+  - package-ecosystem: "github-actions"
     directory: /
     schedule:
       interval: "daily"
