@@ -440,3 +440,12 @@ You are using the Keycloak and after inspecting the `SAMLResponse` for the cause
 ```
 
 If you do not explicitly specify the `NameIDPolicy Format` on the Jenkins side and your Keycloak's Client's `Name ID format` is `email`, any user who does not have Email configured will fail to authenticated with the above status.
+
+## Redirecting to Base URL Rather than Original Requested URL
+
+After the logins complete successfully we are expecting to be redirected back to the original requested URL however after a successful login Jenkins will redirect us to the base url.
+
+You can enable Fine logging to verify the redirection is correct. 
+Check you do not have any reverse proxy is removing headers or adding restrictions to the cookies.
+
+[set-cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie)
